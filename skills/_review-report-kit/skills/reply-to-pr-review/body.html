@@ -1,0 +1,104 @@
+<!-- reply-to-pr-review report template (generated from _review-report-kit).
+     Fill the FILL: sections; keep classes/IDs and the script intact - the
+     JS wires collapsing, the status/label/word filters, comment boxes,
+     export, jump, and clear off them. Set KEY_PREFIX (bottom) once per PR and never
+     change it, or the user's saved notes and collapse states orphan. -->
+<title>PR #NNN Review Triage</title>
+<!--STYLE-->
+
+<main>
+<header class="report">
+  <p class="eyebrow">Review triage &middot; last refreshed <span id="updated-at">FILL: date -u +"%Y-%m-%d %H:%M UTC"</span></p>
+  <h1>FILL: PR <a href="...">#NNN</a> - title</h1>
+  <p class="meta">FILL: branch, reviewed-at commit (permalink anchor), origin head, thread counts, reviewers, validation status.</p>
+
+  <ul class="tally">
+    <!-- FILL: one li per status in play; counts must equal the card count.
+         li classes: open / done / local / replied / (none for no-action).
+         data-st names the pill class the tile filters (clicking a tile shows
+         only cards carrying that pill): open / done / local / replied / none -->
+    <li class="open" data-st="open"><span class="n">0</span><span class="lbl">Action needed</span></li>
+    <li class="done" data-st="done"><span class="n">0</span><span class="lbl">Fixed &amp; pushed</span></li>
+    <li class="local" data-st="local"><span class="n">0</span><span class="lbl">Fixed locally</span></li>
+    <li class="replied" data-st="replied"><span class="n">0</span><span class="lbl">Awaiting reviewer</span></li>
+    <li data-st="none"><span class="n">0</span><span class="lbl">No action</span></li>
+  </ul>
+  <p class="meta" style="margin-top:1rem">Only items that still need action from you start expanded; the rest collapse to their status line - click a card's header to toggle. Click a count above to show only that status. Decide with one click: <strong>Agree</strong> tells Claude to do what the card says (apply the suggested fix, post the paste-ready reply) - the card collapses in place with a green edge and an <em>agreed</em> chip and the page moves on to the next open card; <strong>Drop</strong> means leave it - the card dims, is struck through and collapses in place, with an Undo; on your next visit dropped cards stay hidden until you click <strong>Show dropped</strong>. Click a pressed button again to take the decision back and re-open the card. The paste-ready reply is editable - type in it, <strong>Copy</strong> takes your wording and <strong>Revert</strong> restores Claude's; an edited reply is exported as yours, so Claude keeps it word for word. The text box is for anything else (a different fix, a reason, a question back). Decisions and notes are saved in this browser; when done, hit <strong>Copy new comments</strong> and paste the block back to Claude - comments you already copied are skipped (use Copy all to re-send everything). Cards in that next batch carry a <em>to copy</em> chip in their header; hover the button to outline them, or use <strong>Not copied yet</strong> to list them.</p>
+  <div class="viewbar" data-pinned="FILL: comma-separated tag texts to keep in this row (e.g. quick win); delete the attribute if none">
+    <button type="button" id="expand-all">Expand all</button>
+    <button type="button" id="collapse-all">Collapse all</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" id="filter-action" aria-pressed="false">Action needed only</button>
+    <button type="button" id="filter-nonote" aria-pressed="false">Without my comment</button>
+    <button type="button" id="filter-pending" aria-pressed="false" hidden>Not copied yet</button>
+    <button type="button" id="show-dropped" aria-pressed="false" hidden>Show dropped</button>
+    <!-- pinned label chips are inserted here by the JS -->
+    <input type="search" id="search-text" placeholder='Filter by words - "quotes" for a phrase' aria-label="Filter cards by words" title="Press / to focus">
+  </div>
+  <details class="morefilters" id="more-filters">
+    <summary>More filters</summary>
+    <div class="labelgroups" id="label-groups"></div>
+  </details>
+  <p class="filterline" id="filter-line" hidden></p>
+</header>
+
+<!-- FILL: sections. Section classes color the count chip:
+     s-fix (code changes), s-docs (doc fixes), s-answer (answerable),
+     s-decision (decisions/follow-ups). Example section + card: -->
+<section class="s-fix">
+  <h2>Needs a code change <span class="count-chip">1</span></h2>
+  <p class="section-note">FILL: one-line framing for the section.</p>
+
+  <article class="item">
+    <div class="item-head">
+      <h3>FILL: card title - stable across re-runs (it is the storage key)</h3>
+      <!-- status pill(s): st open|done|local|replied|none.
+           A pushed fix with no commit-linked thread reply gets BOTH:
+           <span class="st done">fixed & pushed</span>
+           <span class="st open">commit reply missing</span>
+           A card the user dropped (export said MY DECISION: drop) keeps its
+           content and gets <span class="st none dropped">dropped</span> -
+           it counts under "No action" and hides by default. -->
+      <span class="st open">action needed</span>
+      <span class="tag fix">critical fix</span>
+      <span class="who">reviewer &middot; <a href="https://github.com/O/R/pull/N#discussion_rID">comment</a></span>
+    </div>
+    <div class="quote">"FILL: short quote of the reviewer's point."</div>
+    <p class="verdict v-fix"><strong>FILL: verified verdict.</strong> Evidence, file:line permalinks, what to do.</p>
+    <!-- single-line code links go to the PR changes view:
+         #diff-<sha256 of the file path, no trailing newline> + R<line>
+         (new code) or L<line> (old side); blob permalinks (as below) only
+         for ranges or files outside the PR diff (SKILL.md section 2). -->
+    <div class="snippet">
+      <div class="snippet-head"><a href="https://github.com/O/R/blob/SHA/path#L1-L5">path:1-5</a><span class="where">why this snippet matters</span></div>
+      <pre><code>FILL: escaped code</code></pre>
+    </div>
+    <div class="snippet suggest">
+      <div class="snippet-head"><span class="fixlbl">Suggested fix</span><span class="where">where it lands</span></div>
+      <pre><code><span class="d-del">-old line</span>
+<span class="d-ins">+new line</span></code></pre>
+    </div>
+    <!-- paste-ready reply in the user's voice (SKILL.md section 4); the JS
+         turns it into an editable box with Copy and Revert. Delete the block
+         when the card owes no reply. When an export comes back with a reply
+         marked EDITED BY ME, put that wording here verbatim on the next
+         publish. -->
+    <div class="snippet draft">
+      <div class="snippet-head"><span class="fixlbl">Paste-ready reply</span><span class="where">FILL: thread it answers</span></div>
+      <pre><code>FILL: the reply, ready to paste on GitHub</code></pre>
+    </div>
+  </article>
+</section>
+
+<div class="fallback" id="fallback" hidden>
+  <h2 style="font-size:1rem">Your comments as one block</h2>
+  <p class="meta">Clipboard access was blocked - select everything below and copy it manually.</p>
+  <textarea id="fallback-text" readonly aria-label="All comments as one block"></textarea>
+</div>
+
+<footer class="report">
+  FILL: which commit the permalinks pin to, when statuses were last refreshed against what.
+</footer>
+</main>
+
+<!--SCRIPT-->

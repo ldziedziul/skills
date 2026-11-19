@@ -1,0 +1,12 @@
+{
+  "name": "ldziedziul-skills",
+  "owner": { "name": "Łukasz Dziedziul" },
+  "description": "Łukasz Dziedziul's Claude Code skills",
+  "plugins": [
+    {
+      "name": "lukasz",
+      "description": "PR review, self-review, design report and plain-English writing skills",
+      "source": "./"
+    }
+  ]
+}

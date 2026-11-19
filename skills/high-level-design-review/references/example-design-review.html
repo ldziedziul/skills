@@ -1,0 +1,514 @@
+<title>Nightly Export Architecture Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+/* Layout: one reading column (~72ch) with full-width figures; review notes sit as two-column strength/concern grids per lens. */
+:root {
+  --bg: #f6f7f5;
+  --panel: #ffffff;
+  --panel-2: #eef1ee;
+  --fg: #1c2421;
+  --muted: #5b6863;
+  --line: #cfd6d2;
+  --accent: #00875a;        /* the system under review */
+  --accent-soft: #dcefe6;
+  --concern: #b45309;       /* boundary crossings and risks */
+  --concern-soft: #fbecd9;
+  --link: #0b6b8a;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121715; --panel: #1a211e; --panel-2: #212a26; --fg: #e3e9e6; --muted: #9aa8a2;
+    --line: #34403b; --accent: #3ccf95; --accent-soft: #173a2c; --concern: #f0a24a; --concern-soft: #3a2a17;
+    --link: #6cc3e0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121715; --panel: #1a211e; --panel-2: #212a26; --fg: #e3e9e6; --muted: #9aa8a2;
+  --line: #34403b; --accent: #3ccf95; --accent-soft: #173a2c; --concern: #f0a24a; --concern-soft: #3a2a17;
+  --link: #6cc3e0; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+main { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; display: grid; gap: 56px; }
+.prose { max-width: 72ch; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2.3rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.15rem; font-family: var(--font-body); font-weight: 600; }
+p { margin: 0; }
+a { color: var(--link); }
+code { font-family: var(--font-mono); font-size: .86em; background: var(--panel-2); padding: .05em .3em; border-radius: 3px; overflow-wrap: anywhere; }
+section { display: grid; gap: 18px; }
+.eyebrow { font-family: var(--font-mono); font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+header { display: grid; gap: 14px; }
+.lede { font-size: 1.08rem; max-width: 70ch; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.facts div { background: var(--panel); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.facts b { font-family: var(--font-mono); font-size: 1.15rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.facts span { color: var(--muted); font-size: .82rem; }
+figure { margin: 0; display: grid; gap: 10px; }
+.fig { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; overflow-x: auto; }
+.fig svg { display: block; width: 100%; min-width: 760px; height: auto; color: var(--fg); font-family: var(--font-body); }
+figcaption { color: var(--muted); font-size: .9rem; max-width: 80ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: .82rem; color: var(--muted); }
+.legend i { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--fg); vertical-align: middle; margin-right: 6px; }
+.legend i.c { border-top: 2px dashed var(--concern); }
+.legend i.a { border: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.lenses { display: grid; gap: 32px; }
+.lens { display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 22px; }
+.lens-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+.verdict { font-family: var(--font-mono); font-size: .78rem; padding: 2px 9px; border-radius: 99px; background: var(--concern-soft); color: var(--concern); }
+.cols { display: grid; grid-template-columns: 1fr 1.35fr; gap: 24px; }
+.cols > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.cols h4 { margin: 0; font-size: .78rem; font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.good h4 { color: var(--accent); }
+.bad h4 { color: var(--concern); }
+ul.points { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+ul.points li { padding-left: 14px; border-left: 2px solid var(--line); }
+.good ul.points li { border-left-color: var(--accent); }
+.bad ul.points li { border-left-color: var(--concern); }
+ul.points li b { font-weight: 600; }
+.ref { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); white-space: nowrap; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--panel-2); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+ol.qs { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; max-width: 80ch; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 18px; }
+@media (max-width: 720px) { .cols { grid-template-columns: 1fr; } h1 { font-size: 1.8rem; } }
+</style>
+
+<main>
+<header>
+  <p class="eyebrow">Design review &middot; example-org/storefront PR #87 &middot; head 3f9c2a1e</p>
+  <h1>Nightly Export Architecture Review</h1>
+  <p class="lede">PR #87 adds a nightly export job. A Kubernetes CronJob starts an exporter that reads the day's orders from the Postgres read replica, writes them to S3 as Parquet files, checks the row counts against the source, and posts a summary to the finance team's webhook. A manifest table records every run so a failed night can be retried. This page lays out the design and assesses it for architecture, maintainability and modularization. The project, PR and numbers are made up for illustration.</p>
+  <div class="facts">
+    <div><b>14</b><span>Python modules in <code>export/</code> plus <code>exportctl.py</code></span></div>
+    <div><b>2,140</b><span>lines of job code</span></div>
+    <div><b>612</b><span>lines in <code>exportctl.py</code>, 9 subcommands</span></div>
+    <div><b>3,050</b><span>lines of tests (284 tests)</span></div>
+    <div><b>1</b><span>CronJob, 02:15 UTC every night</span></div>
+    <div><b>0</b><span>consumers reading the files yet (finance starts in #91)</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">1 &middot; System context</p>
+    <h2>Who talks to whom, and where state lives</h2>
+  </div>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 960 400" role="img" aria-label="The CronJob starts the exporter; it reads the read replica, writes Parquet to S3, records the run in a manifest table and posts to a webhook; the exporter also reads billing tables directly">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          <marker id="a1c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--concern)"/></marker>
+        </defs>
+        <text x="20" y="18" font-size="11" letter-spacing="1" style="fill: var(--muted)">KUBERNETES</text>
+        <text x="360" y="18" font-size="11" letter-spacing="1" style="fill: var(--muted)">DATA SOURCES</text>
+        <text x="680" y="18" font-size="11" letter-spacing="1" style="fill: var(--muted)">OUTPUTS</text>
+
+        <rect x="20" y="34" width="260" height="70" rx="5" style="fill: var(--panel-2); stroke: currentColor" stroke-width="1.2"/>
+        <text x="34" y="58" font-size="14" font-weight="600" fill="currentColor">nightly-export CronJob</text>
+        <text x="34" y="77" font-size="11.5" style="fill: var(--muted)">02:15 UTC, concurrencyPolicy: Forbid</text>
+        <text x="34" y="94" font-size="11.5" style="fill: var(--muted)">runs exportctl run --date yesterday</text>
+
+        <rect x="20" y="150" width="260" height="130" rx="5" style="fill: var(--accent-soft); stroke: var(--accent)" stroke-width="1.2"/>
+        <text x="34" y="172" font-size="13" font-weight="600" fill="currentColor">exporter pod</text>
+        <g font-size="11.5" fill="currentColor">
+          <rect x="34" y="184" width="110" height="26" rx="3" style="fill: var(--panel); stroke: var(--accent)"/><text x="89" y="201" text-anchor="middle">extract</text>
+          <rect x="154" y="184" width="110" height="26" rx="3" style="fill: var(--panel); stroke: var(--accent)"/><text x="209" y="201" text-anchor="middle">write</text>
+          <rect x="34" y="218" width="110" height="26" rx="3" style="fill: var(--panel); stroke: var(--accent)"/><text x="89" y="235" text-anchor="middle">validate</text>
+          <rect x="154" y="218" width="110" height="26" rx="3" style="fill: var(--panel); stroke: var(--accent)"/><text x="209" y="235" text-anchor="middle">report</text>
+        </g>
+        <text x="34" y="266" font-size="11" style="fill: var(--muted)">one process, steps run in order</text>
+
+        <rect x="360" y="60" width="240" height="60" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="372" y="84" font-size="12.5" font-weight="600" fill="currentColor">Postgres read replica</text>
+        <text x="372" y="103" font-size="11" style="fill: var(--muted)">orders, order_lines</text>
+
+        <rect x="360" y="150" width="240" height="60" rx="5" style="fill: var(--concern-soft); stroke: var(--concern)" stroke-width="1.2"/>
+        <text x="372" y="174" font-size="12.5" font-weight="600" fill="currentColor">billing service tables</text>
+        <text x="372" y="193" font-size="11" style="fill: var(--muted)">invoices, refunds (not its own)</text>
+
+        <rect x="360" y="250" width="240" height="60" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="372" y="274" font-size="12.5" font-weight="600" fill="currentColor">export_manifest table</text>
+        <text x="372" y="293" font-size="11" style="fill: var(--muted)">one row per date: status, counts, keys</text>
+
+        <rect x="680" y="60" width="260" height="60" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="692" y="84" font-size="12.5" font-weight="600" fill="currentColor">S3 bucket</text>
+        <text x="692" y="103" font-size="11" style="fill: var(--muted)">orders/date=YYYY-MM-DD/*.parquet</text>
+
+        <rect x="680" y="250" width="260" height="60" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="692" y="274" font-size="12.5" font-weight="600" fill="currentColor">finance webhook</text>
+        <text x="692" y="293" font-size="11" style="fill: var(--muted)">summary or failure notice</text>
+
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <path d="M150 104 V148" marker-end="url(#a1)"/>
+          <path d="M280 190 L358 95" marker-end="url(#a1)"/>
+          <path d="M280 255 L358 280" marker-end="url(#a1)"/>
+          <path d="M280 165 H320 V40 H810 V58" marker-end="url(#a1)"/>
+          <path d="M150 280 V350 H810 V312" marker-end="url(#a1)"/>
+        </g>
+        <path d="M280 180 H358" fill="none" style="stroke: var(--concern)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#a1c)"/>
+        <g font-size="11" fill="currentColor">
+          <text x="300" y="118">SELECT</text>
+          <text x="560" y="34">PutObject, multipart</text>
+          <text x="296" y="262">upsert run row</text>
+          <text x="420" y="344">POST summary</text>
+        </g>
+        <text x="288" y="172" font-size="10.5" style="fill: var(--concern)">direct SQL</text>
+      </svg>
+    </div>
+    <figcaption>A run's state sits in two places: the manifest row in Postgres and the files in S3. The exporter writes the files first and the manifest row last, so the manifest is the record of what finished. The dashed edge reads another service's tables directly instead of its API.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">2 &middot; Run lifecycle</p>
+    <h2>What happens to one night's export</h2>
+  </div>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 960 300" role="img" aria-label="A run moves from scheduled to exporting to validating to published; a failed validation and a timeout each have their own exit; a pod killed during upload leaves partial files that nothing cleans up">
+        <defs>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          <marker id="a2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--concern)"/></marker>
+        </defs>
+        <g stroke="currentColor" stroke-width="1.2">
+          <rect x="20" y="70" width="160" height="58" rx="29" style="fill: var(--panel-2)"/>
+          <rect x="250" y="70" width="170" height="58" rx="29" style="fill: var(--accent-soft); stroke: var(--accent)"/>
+          <rect x="500" y="70" width="170" height="58" rx="29" style="fill: var(--panel-2)"/>
+          <rect x="750" y="70" width="190" height="58" rx="29" style="fill: var(--panel-2)"/>
+        </g>
+        <g font-size="13" font-weight="600" fill="currentColor" text-anchor="middle">
+          <text x="100" y="98">Scheduled</text>
+          <text x="335" y="98">Exporting</text>
+          <text x="585" y="98">Validating</text>
+          <text x="845" y="98">Published</text>
+        </g>
+        <g font-size="11" style="fill: var(--muted)" text-anchor="middle">
+          <text x="100" y="116">manifest: pending</text>
+          <text x="335" y="116">chunks of 50k rows</text>
+          <text x="585" y="116">count S3 vs source</text>
+          <text x="845" y="116">manifest: done, webhook</text>
+        </g>
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <path d="M180 99 H248" marker-end="url(#a2)"/>
+          <path d="M420 99 H498" marker-end="url(#a2)"/>
+          <path d="M670 99 H748" marker-end="url(#a2)"/>
+          <path d="M300 70 C300 22, 370 22, 370 68" marker-end="url(#a2)"/>
+          <path d="M585 128 V196" marker-end="url(#a2)"/>
+          <path d="M100 128 V196" marker-end="url(#a2)"/>
+        </g>
+        <path d="M335 128 V160 H845 V196" fill="none" style="stroke: var(--concern)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#a2c)"/>
+        <g font-size="11" fill="currentColor">
+          <text x="214" y="90" text-anchor="middle">start</text>
+          <text x="459" y="90" text-anchor="middle">last chunk</text>
+          <text x="709" y="90" text-anchor="middle">counts match</text>
+          <text x="335" y="18" text-anchor="middle">next chunk</text>
+          <text x="600" y="154" style="fill: var(--concern)">pod killed mid-upload</text>
+        </g>
+        <rect x="20" y="198" width="230" height="72" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="32" y="219" font-size="12" font-weight="600" fill="currentColor">Timed out (activeDeadline 2 h)</text>
+        <text x="32" y="237" font-size="11" style="fill: var(--muted)">manifest stays pending;</text>
+        <text x="32" y="253" font-size="11" style="fill: var(--muted)">next night retries the date</text>
+
+        <rect x="470" y="198" width="230" height="72" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1"/>
+        <text x="482" y="219" font-size="12" font-weight="600" fill="currentColor">Validation failed</text>
+        <text x="482" y="237" font-size="11" style="fill: var(--muted)">manifest: failed, webhook alert;</text>
+        <text x="482" y="253" font-size="11" style="fill: var(--muted)">files stay for inspection</text>
+
+        <rect x="720" y="198" width="220" height="72" rx="5" style="fill: var(--concern-soft); stroke: var(--concern)" stroke-width="1.2"/>
+        <text x="732" y="219" font-size="12" font-weight="600" style="fill: var(--concern)">Partial files, no manifest</text>
+        <text x="732" y="237" font-size="11" fill="currentColor">a retry writes new keys; readers</text>
+        <text x="732" y="253" font-size="11" fill="currentColor">listing the prefix see both</text>
+      </svg>
+    </div>
+    <figcaption>The state machine in <code>export/run.py</code> is small and well tested. The weak point is the amber exit: files are written under their final keys while the export runs, so a killed pod leaves files that look like a finished export to anyone who lists the prefix instead of reading the manifest.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">3 &middot; Module map</p>
+    <h2>How the code is split, and where it reaches outside itself</h2>
+  </div>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 960 470" role="img" aria-label="exportctl imports 9 of 14 export modules; modules group into extraction, writing and reporting; three edges cross into the billing schema, a copied schema file and raw S3 deletes">
+        <defs>
+          <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+          <marker id="a3c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--concern)"/></marker>
+        </defs>
+        <g stroke-width="1">
+          <rect x="20" y="50" width="190" height="260" rx="6" style="fill: var(--panel-2); stroke: var(--line)"/>
+          <rect x="230" y="50" width="220" height="260" rx="6" style="fill: var(--panel-2); stroke: var(--line)"/>
+          <rect x="470" y="50" width="210" height="260" rx="6" style="fill: var(--panel-2); stroke: var(--line)"/>
+          <rect x="700" y="50" width="240" height="260" rx="6" style="fill: var(--panel-2); stroke: var(--line)"/>
+        </g>
+        <g font-size="11" letter-spacing=".8" style="fill: var(--muted)">
+          <text x="32" y="70">ENTRY POINT</text>
+          <text x="242" y="70">EXTRACTION</text>
+          <text x="482" y="70">WRITING</text>
+          <text x="712" y="70">CHECKS AND REPORTING</text>
+        </g>
+        <rect x="32" y="82" width="166" height="216" rx="4" style="fill: var(--panel); stroke: currentColor" stroke-width="1.2"/>
+        <text x="44" y="104" font-size="13" font-weight="600" font-family="IBM Plex Mono, monospace" fill="currentColor">exportctl.py</text>
+        <text x="186" y="104" font-size="11" text-anchor="end" style="fill: var(--muted)">612</text>
+        <g font-size="11.5" fill="currentColor">
+          <text x="44" y="130">run, retry</text>
+          <text x="44" y="154">backfill --from --to</text>
+          <text x="44" y="178">status, list</text>
+          <text x="44" y="202" style="fill: var(--concern)">purge-prefix</text>
+          <text x="44" y="226">notify</text>
+          <text x="44" y="250">command line</text>
+        </g>
+        <text x="44" y="286" font-size="10.5" style="fill: var(--muted)">imports 9 of 14 modules</text>
+
+        <g font-size="11.5" font-family="IBM Plex Mono, monospace" fill="currentColor">
+          <rect x="242" y="82" width="196" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="252" y="99">orders_query</text><text x="428" y="99" text-anchor="end" style="fill: var(--muted)">214</text>
+          <rect x="242" y="114" width="196" height="26" rx="3" style="fill: var(--panel); stroke: var(--concern)"/><text x="252" y="131">billing_join</text><text x="428" y="131" text-anchor="end" style="fill: var(--muted)">168</text>
+          <rect x="242" y="146" width="196" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="252" y="163">chunker</text><text x="428" y="163" text-anchor="end" style="fill: var(--muted)">97</text>
+          <rect x="242" y="178" width="196" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="252" y="195">db</text><text x="428" y="195" text-anchor="end" style="fill: var(--muted)">61</text>
+
+          <rect x="482" y="82" width="186" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="492" y="99">parquet_writer</text><text x="658" y="99" text-anchor="end" style="fill: var(--muted)">246</text>
+          <rect x="482" y="114" width="186" height="26" rx="3" style="fill: var(--panel); stroke: var(--concern)"/><text x="492" y="131">schema</text><text x="658" y="131" text-anchor="end" style="fill: var(--muted)">132</text>
+          <rect x="482" y="146" width="186" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="492" y="163">s3_upload</text><text x="658" y="163" text-anchor="end" style="fill: var(--muted)">118</text>
+          <rect x="482" y="178" width="186" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="492" y="195">keys</text><text x="658" y="195" text-anchor="end" style="fill: var(--muted)">38</text>
+
+          <rect x="712" y="82" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="99">run</text><text x="918" y="99" text-anchor="end" style="fill: var(--muted)">189</text>
+          <rect x="712" y="114" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="131">validate</text><text x="918" y="131" text-anchor="end" style="fill: var(--muted)">152</text>
+          <rect x="712" y="146" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="163">manifest</text><text x="918" y="163" text-anchor="end" style="fill: var(--muted)">104</text>
+          <rect x="712" y="178" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="195">summary</text><text x="918" y="195" text-anchor="end" style="fill: var(--muted)">87</text>
+          <rect x="712" y="210" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="227">webhook</text><text x="918" y="227" text-anchor="end" style="fill: var(--muted)">56</text>
+          <rect x="712" y="242" width="216" height="26" rx="3" style="fill: var(--panel); stroke: var(--line)"/><text x="722" y="259">config</text><text x="918" y="259" text-anchor="end" style="fill: var(--muted)">49</text>
+        </g>
+        <g style="fill: var(--accent)">
+          <circle cx="878" cy="95" r="4"/><circle cx="878" cy="127" r="4"/><circle cx="878" cy="191" r="4"/>
+        </g>
+        <circle cx="398" cy="159" r="4" style="fill: var(--accent)"/>
+        <g stroke="currentColor" stroke-width="1.2" fill="none">
+          <path d="M115 82 V36 H810 V48" marker-end="url(#a3)"/>
+          <path d="M340 36 V48" marker-end="url(#a3)"/>
+          <path d="M575 36 V48" marker-end="url(#a3)"/>
+        </g>
+        <g font-size="10.5" fill="currentColor">
+          <text x="348" y="30">backfill</text>
+          <text x="583" y="30">purge-prefix</text>
+          <text x="818" y="30">run, retry, status</text>
+        </g>
+        <text x="20" y="358" font-size="11" letter-spacing=".8" style="fill: var(--muted)">OUTSIDE THE EXPORT JOB</text>
+        <rect x="20" y="370" width="260" height="80" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1.2"/>
+        <text x="32" y="392" font-size="12.5" font-weight="600" fill="currentColor">billing service schema</text>
+        <text x="32" y="411" font-size="11" style="fill: var(--muted)">invoices, refunds columns</text>
+        <text x="32" y="427" font-size="11" style="fill: var(--muted)">owned and migrated by billing</text>
+
+        <rect x="330" y="370" width="290" height="80" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1.2"/>
+        <text x="342" y="392" font-size="12.5" font-weight="600" fill="currentColor">analytics/contracts/orders.avsc</text>
+        <text x="342" y="411" font-size="11" style="fill: var(--muted)">the published file schema,</text>
+        <text x="342" y="427" font-size="11" style="fill: var(--muted)">copied into schema.py by hand</text>
+
+        <rect x="670" y="370" width="270" height="80" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1.2"/>
+        <text x="682" y="392" font-size="12.5" font-weight="600" fill="currentColor">S3 API: DeleteObjects</text>
+        <text x="682" y="411" font-size="11" style="fill: var(--muted)">deletes every key under a prefix,</text>
+        <text x="682" y="427" font-size="11" style="fill: var(--muted)">no dry run, no manifest check</text>
+
+        <g style="stroke: var(--concern)" stroke-width="1.4" fill="none" stroke-dasharray="5 3">
+          <path d="M340 140 H460 V330 H150 V368" marker-end="url(#a3c)"/>
+          <path d="M575 140 V368" marker-end="url(#a3c)"/>
+          <path d="M80 298 V340 H800 V368" marker-end="url(#a3c)"/>
+        </g>
+        <g font-size="10.5" style="fill: var(--concern)">
+          <text x="160" y="324">direct SQL join</text>
+          <text x="583" y="356">copied by hand</text>
+          <text x="690" y="334">purge-prefix</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i></i>imports or calls</span>
+      <span><i class="c"></i>crosses the job's boundary</span>
+      <span><i class="a"></i>pure function of its inputs (no I/O)</span>
+      <span>numbers: lines of code</span>
+    </div>
+    <figcaption>Inside <code>export/</code> the split is clean: extraction, writing and reporting never import each other except through <code>run</code>, and the checks are mostly pure. The amber edges are where the job depends on things it doesn't own: another service's tables, a schema it copied, and a delete that trusts the caller's prefix.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">4 &middot; Assessment</p>
+    <h2>Architecture, maintainability, modularization</h2>
+    <p>Each claim below was checked against the code at the head commit. The line references link to that commit.</p>
+  </div>
+
+  <div class="lenses">
+    <div class="lens">
+      <div class="lens-head"><h3>Architecture</h3><span class="verdict">sound core, fragile edges</span></div>
+      <div class="cols">
+        <div class="good"><h4>Works well</h4>
+          <ul class="points">
+            <li><b>The manifest is the source of truth.</b> It is written last, after validation, so "done" in the table means the files are complete and counted.</li>
+            <li><b>Reads hit the replica, not the primary.</b> The connection string comes from <code>EXPORT_REPLICA_URL</code> and the job refuses to start against a writable database.</li>
+            <li><b>Retries are by date.</b> Any date whose manifest row is not <code>done</code> is picked up by the next run, so a missed night heals itself.</li>
+            <li><b>One run at a time.</b> <code>concurrencyPolicy: Forbid</code> plus a row lock on the manifest stop two pods exporting the same date.</li>
+          </ul>
+        </div>
+        <div class="bad"><h4>Concerns</h4>
+          <ul class="points">
+            <li><b>Files land under their final keys while the run is in progress.</b> A killed pod leaves partial files that a prefix listing can't tell from a finished export. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/export/keys.py#L12-L18">keys.py:12</a></li>
+            <li><b>The job reads billing's tables directly.</b> A column rename in billing breaks the export at 02:15 with no warning to billing. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/export/billing_join.py#L40-L58">billing_join.py:40</a></li>
+            <li><b>Chunk size is global.</b> <code>CHUNK_ROWS = 50_000</code> fits orders, but the same constant sizes the refunds pass, whose rows are ten times wider. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/export/chunker.py#L9">chunker.py:9</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="lens">
+      <div class="lens-head"><h3>Maintainability</h3><span class="verdict">well tested, some duplicated knowledge</span></div>
+      <div class="cols">
+        <div class="good"><h4>Works well</h4>
+          <ul class="points">
+            <li><b>Heavily tested.</b> There are 3,050 lines of tests for 2,140 lines of code, and <code>test_run.py</code> walks every state transition.</li>
+            <li><b>The README maps to the code.</b> It lists each subcommand, each manifest status and who sets it.</li>
+            <li><b>Failures say what to do.</b> The webhook alert names the date, the failed check and the <code>exportctl retry</code> command to run.</li>
+          </ul>
+        </div>
+        <div class="bad"><h4>Concerns</h4>
+          <ul class="points">
+            <li><b>The same facts are kept in several places.</b> The column list is in <code>schema.py</code>, <code>orders_query.py</code> and a test fixture; the manifest statuses are spelled out 3 times.</li>
+            <li><b>The files have no reader yet.</b> Finance starts consuming them in #91, so the validation rules are guesses until then. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/export/validate.py#L22-L30">validate.py:22</a></li>
+            <li><b>Tests mock the S3 client at the method level.</b> A switch from <code>put_object</code> to the multipart helper passes every test while changing what is uploaded. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/tests/test_s3_upload.py#L15-L27">test_s3_upload.py:15</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="lens">
+      <div class="lens-head"><h3>Modularization</h3><span class="verdict">clean package, leaky boundaries</span></div>
+      <div class="cols">
+        <div class="good"><h4>Works well</h4>
+          <ul class="points">
+            <li><b>Small, single-purpose modules.</b> All 14 <code>export/</code> modules are under 250 lines and each does one step.</li>
+            <li><b>Imports follow the pipeline.</b> Extraction never imports writing or reporting code; only <code>run</code> wires them together.</li>
+          </ul>
+        </div>
+        <div class="bad"><h4>Concerns</h4>
+          <ul class="points">
+            <li><b>The file schema is copied, not imported.</b> <code>schema.py</code> restates <code>orders.avsc</code> by hand, and nothing fails when the two drift. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/export/schema.py#L1-L20">schema.py:1</a></li>
+            <li><b>A destructive command lives next to routine ones.</b> <code>exportctl purge-prefix</code> deletes every key under any prefix it is given, with no dry run and no manifest check. <a class="ref" href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/exportctl.py#L402-L431">exportctl.py:402</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">5 &middot; Non-functional requirements</p>
+    <h2>Reliability, operations, security, cost</h2>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Area</th><th>Assessment</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td>Reliability</td><td>Good, one gap</td><td>Missed dates are retried and two runs can't overlap. The gap is the partial files a killed pod leaves (figure 2).</td></tr>
+        <tr><td>Operability and observability</td><td>Good</td><td>Each step logs its row counts and duration; the webhook gets a summary or an alert with the retry command. <code>exportctl status</code> prints the last 14 manifest rows.</td></tr>
+        <tr><td>Security</td><td>Careful, one question</td><td>The pod's role can write only under <code>orders/</code> and read only the replica. Open question: the same role is allowed <code>DeleteObject</code> for <code>purge-prefix</code>, so the nightly job can delete history it never needs to touch (<a href="https://github.com/example-org/storefront/blob/3f9c2a1e7b40d5c86e21a9f0d3b7c5e8a1f60d24/deploy/export-role.json#L8-L16">export-role.json:8</a>).</td></tr>
+        <tr><td>Performance and scalability</td><td>Fine for today</td><td>About 1.2 million rows a night in 24 chunks. Chunks run one after another, so the 2-hour deadline holds until roughly ten times today's volume.</td></tr>
+        <tr><td>Testability</td><td>Strong</td><td>The checks and the state machine are pure and tested directly; S3 tests mock at too low a level (see Maintainability).</td></tr>
+        <tr><td>Cost</td><td>Small</td><td>One pod for about 20 minutes a night and a few hundred MB of Parquet per day. No lifecycle rule on the bucket yet, so storage grows forever.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">6 &middot; The one boundary worth moving</p>
+    <h2>Where files become visible: today and suggested</h2>
+  </div>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 960 250" role="img" aria-label="Today chunks are written straight under the final prefix; suggested, chunks go to a staging prefix and are copied to the final prefix only after validation passes">
+        <defs>
+          <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        </defs>
+        <text x="20" y="20" font-size="11" letter-spacing=".8" style="fill: var(--muted)">TODAY</text>
+        <text x="510" y="20" font-size="11" letter-spacing=".8" style="fill: var(--muted)">SUGGESTED</text>
+        <line x1="480" y1="10" x2="480" y2="240" style="stroke: var(--line)"/>
+
+        <rect x="20" y="34" width="430" height="44" rx="5" style="fill: var(--panel-2); stroke: currentColor" stroke-width="1.2"/>
+        <text x="235" y="61" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">parquet_writer + s3_upload</text>
+        <rect x="20" y="124" width="430" height="56" rx="5" style="fill: var(--concern-soft); stroke: var(--concern)" stroke-width="1.2"/>
+        <text x="235" y="148" font-size="12.5" font-weight="600" text-anchor="middle" fill="currentColor">orders/date=D/part-*.parquet</text>
+        <text x="235" y="166" font-size="11" text-anchor="middle" style="fill: var(--muted)">visible to readers from the first chunk</text>
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <path d="M235 78 V122" marker-end="url(#a4)"/>
+        </g>
+        <text x="243" y="104" font-size="10.5" fill="currentColor">each chunk</text>
+
+        <rect x="510" y="34" width="430" height="44" rx="5" style="fill: var(--panel-2); stroke: currentColor" stroke-width="1.2"/>
+        <text x="725" y="61" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">parquet_writer + s3_upload</text>
+        <rect x="510" y="110" width="200" height="56" rx="5" style="fill: var(--panel); stroke: currentColor" stroke-width="1.2"/>
+        <text x="610" y="134" font-size="12.5" font-weight="600" text-anchor="middle" fill="currentColor">_staging/run-id/</text>
+        <text x="610" y="152" font-size="11" text-anchor="middle" style="fill: var(--muted)">expires after 7 days</text>
+        <rect x="740" y="110" width="200" height="56" rx="5" style="fill: var(--accent-soft); stroke: var(--accent)" stroke-width="1.2"/>
+        <text x="840" y="134" font-size="12.5" font-weight="600" text-anchor="middle" fill="currentColor">orders/date=D/</text>
+        <text x="840" y="152" font-size="11" text-anchor="middle" style="fill: var(--muted)">complete or absent</text>
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <path d="M610 78 V108" marker-end="url(#a4)"/>
+          <path d="M710 138 H738" marker-end="url(#a4)"/>
+        </g>
+        <text x="618" y="96" font-size="10.5" fill="currentColor">each chunk</text>
+        <text x="724" y="196" font-size="10.5" text-anchor="middle" fill="currentColor">copy after validate, then manifest: done</text>
+      </svg>
+    </div>
+    <figcaption>Writing to a staging prefix and copying to the final prefix only after validation means a reader never sees half an export, a retry never mixes with leftovers, and a bucket lifecycle rule cleans up abandoned runs. It also removes the main reason <code>purge-prefix</code> exists.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">7 &middot; Suggested boundaries</p>
+    <h2>Smaller moves, in order of value</h2>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Today</th><th>Suggested</th><th>What it buys</th></tr></thead>
+      <tbody>
+        <tr><td>Chunks written under the final prefix</td><td>Staging prefix, copy after validation</td><td>Readers never see partial exports.</td></tr>
+        <tr><td>Direct SQL join on billing tables</td><td>Billing's export view or API</td><td>Billing can change its schema without breaking this job.</td></tr>
+        <tr><td><code>schema.py</code> copied from <code>orders.avsc</code></td><td>Generate it from the contract, or test that they match</td><td>Schema drift fails CI instead of finance's import.</td></tr>
+        <tr><td><code>purge-prefix</code> in the nightly role</td><td>Separate admin role, <code>--dry-run</code> by default</td><td>The nightly job can't delete history.</td></tr>
+        <tr><td>Global <code>CHUNK_ROWS</code></td><td>Chunk size per source</td><td>Wide refund rows don't blow the pod's memory.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <p class="eyebrow">8 &middot; To settle with the author</p>
+    <h2>Open questions</h2>
+  </div>
+  <ol class="qs">
+    <li>Can the upload go through a staging prefix, or do readers need files to appear as early as possible?</li>
+    <li>Does billing offer a view or endpoint for invoices and refunds, so the job doesn't depend on its tables?</li>
+    <li>Who besides an operator needs <code>purge-prefix</code>, and can it move out of the nightly role?</li>
+    <li>Should #87 and #91 merge together, so the validation rules are checked against the real reader?</li>
+  </ol>
+</section>
+
+<footer>Based on example-org/storefront PR #87 at head <code>3f9c2a1e</code>, a made-up PR used to show the shape of a finished report. Sources: the PR diff, <code>export/README.md</code>, an import graph computed from the code, and three review passes (bugs and operations, architecture, maintainability).</footer>
+</main>

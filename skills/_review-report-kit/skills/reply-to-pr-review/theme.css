@@ -1,0 +1,31 @@
+  /* reply-to-pr-review: status pills, tag kinds, section chips, label chips */
+  .tally .done .lbl { color: var(--answer); }
+  .tally .local .lbl { color: var(--docs); }
+  .tally .replied .lbl { color: var(--accent); }
+  .tally .open .lbl { color: var(--fix); }
+  .s-fix .count-chip { background: var(--fix-bg); color: var(--fix); }
+  .s-docs .count-chip { background: var(--docs-bg); color: var(--docs); }
+  .s-answer .count-chip { background: var(--answer-bg); color: var(--answer); }
+  .s-decision .count-chip { background: var(--decision-bg); color: var(--decision); }
+  .labelchip.fix { --lc: var(--fix); --lc-bg: var(--fix-bg); }
+  .labelchip.docs { --lc: var(--docs); --lc-bg: var(--docs-bg); }
+  .labelchip.answer { --lc: var(--answer); --lc-bg: var(--answer-bg); }
+  .labelchip.decision { --lc: var(--decision); --lc-bg: var(--decision-bg); }
+  article.item.dropped .item-head .st:not(.dropchip):not(.copychip):not(.dropped) { display: none; }
+  .tally .open { --tc: var(--fix); --tc-bg: var(--fix-bg); }
+  .tally .local { --tc: var(--docs); --tc-bg: var(--docs-bg); }
+  .tally .done { --tc: var(--answer); --tc-bg: var(--answer-bg); }
+  .tally .replied { --tc: var(--accent); --tc-bg: var(--accent-bg); }
+  .tag.fix { background: var(--fix-bg); color: var(--fix); }
+  .tag.docs { background: var(--docs-bg); color: var(--docs); }
+  .tag.answer { background: var(--answer-bg); color: var(--answer); }
+  .tag.decision { background: var(--decision-bg); color: var(--decision); }
+  .st.done { background: var(--answer); color: var(--surface); }
+  .st.local { background: var(--docs); color: var(--surface); }
+  .st.replied { background: var(--accent); color: var(--ground); }
+  .st.open { background: transparent; color: var(--fix); border: 1px dashed var(--fix); }
+  .st.none { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .v-fix strong { color: var(--fix); }
+  .v-docs strong { color: var(--docs); }
+  .v-answer strong { color: var(--answer); }
+  .v-decision strong { color: var(--decision); }

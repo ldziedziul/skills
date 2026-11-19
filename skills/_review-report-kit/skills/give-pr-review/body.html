@@ -1,0 +1,123 @@
+<!-- give-pr-review report template.
+     Fill the marked placeholder sections; keep classes/IDs and the script
+     intact - the JS wires collapsing, the status/label/word filters,
+     comment boxes, per-card copy, export, jump, and clear off them. Set KEY_PREFIX
+     (bottom) once per PR and never change it, or the user's saved notes
+     and collapse states orphan. Action pills carry class "act" - the
+     filter and the default-expanded state key off it. -->
+<title>PR #NNN Review Outbox</title>
+<!--STYLE-->
+
+<main>
+<header class="report">
+  <p class="eyebrow">Review outbox &middot; last refreshed <span id="updated-at">FILL: date -u +"%Y-%m-%d %H:%M UTC"</span></p>
+  <h1>FILL: PR <a href="...">#NNN</a> - title</h1>
+  <p class="meta">FILL: repo, author, findings source, thread counts.</p>
+
+  <ul class="tally">
+    <!-- Fill in one li per pill in play (nonzero count) - omit zero-count
+         pills; counts must sum to the card count. Color classes on the li:
+         act alone shows red (to post / re-check); stale uses both,
+         class="act stale", for amber; posted, addressed, and no class
+         (skipped) as shown. data-st names the pill class the tile filters
+         (clicking a tile shows only cards carrying that pill):
+         topost / recheck / stale / posted / addressed / skipped. -->
+    <li class="act" data-st="topost"><span class="n">0</span><span class="lbl">To post</span></li>
+    <li class="act" data-st="recheck"><span class="n">0</span><span class="lbl">Re-check</span></li>
+    <li class="act stale" data-st="stale"><span class="n">0</span><span class="lbl">Stale</span></li>
+    <li class="posted" data-st="posted"><span class="n">0</span><span class="lbl">Awaiting author</span></li>
+    <li class="addressed" data-st="addressed"><span class="n">0</span><span class="lbl">Addressed</span></li>
+    <li data-st="skipped"><span class="n">0</span><span class="lbl">Skipped</span></li>
+  </ul>
+  <!-- Unmatched posted comments (SKILL.md section 4): remove the hidden
+       attribute and list them, one per <br>-separated line; delete the
+       whole block when there are none. -->
+  <p class="meta" id="unmatched" hidden>Unmatched: ...</p>
+  <div class="help">
+    <p class="meta">Cards needing action start open; the rest collapse to their status line - click a header to toggle, or a count above to show just that status.</p>
+    <dl class="help-actions">
+      <dt>Agree</dt>
+      <dd>Post the draft as written. The card gets a green edge and an <em>agreed</em> chip, and stays listed until you mark it posted.</dd>
+      <dt>Drop</dt>
+      <dd>Skip it. The card dims and is struck through, with an Undo. It then stays hidden until you click <strong>Show dropped</strong>.</dd>
+      <dt>Draft box</dt>
+      <dd>The paste-ready comment is editable - type in it and Copy takes your wording. <strong>Revert</strong> restores Claude's text. An edited draft is exported as yours, so Claude keeps it word for word.</dd>
+      <dt>Text box</dt>
+      <dd>For anything else - a reason, a question for Claude.</dd>
+      <dt>Copy buttons</dt>
+      <dd>Each card has its own Copy button. <strong>Copy new comments</strong> (bottom bar) exports what you haven't copied yet; <strong>Copy all</strong> resends everything. Cards in that next batch carry a <em>to copy</em> chip in their header - hover the button to outline them, or use <strong>Not copied yet</strong> to list them.</dd>
+    </dl>
+    <p class="meta">After Agree or Drop the page moves on to the next open card. Click a pressed Agree or Drop again to undo it and reopen the card. Post each comment on GitHub yourself, then tell Claude "posted 2, 5" (or just re-run the report). Decisions and notes are saved in this browser.</p>
+  </div>
+  <div class="viewbar" data-pinned="FILL: comma-separated tag texts to keep in this row (e.g. quick win); delete the attribute if none">
+    <button type="button" id="expand-all">Expand all</button>
+    <button type="button" id="collapse-all">Collapse all</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" id="filter-action" aria-pressed="false">Action needed only</button>
+    <button type="button" id="filter-nonote" aria-pressed="false">Without my comment</button>
+    <button type="button" id="filter-pending" aria-pressed="false" hidden>Not copied yet</button>
+    <button type="button" id="show-dropped" aria-pressed="false" hidden>Show dropped</button>
+    <!-- pinned label chips are inserted here by the JS -->
+    <input type="search" id="search-text" placeholder='Filter by words - "quotes" for a phrase' aria-label="Filter cards by words" title="Press / to focus">
+  </div>
+  <details class="morefilters" id="more-filters">
+    <summary>More filters</summary>
+    <div class="labelgroups" id="label-groups"></div>
+  </details>
+  <p class="filterline" id="filter-line" hidden></p>
+</header>
+
+<!-- FILL: sections, one per severity in play, most severe first:
+     s-major / s-minor / s-nit; inside a section, verified before likely
+     before unsure. Example section + card: -->
+<section class="s-minor">
+  <h2>Minor <span class="count-chip">1</span></h2>
+  <p class="section-note">FILL: one-line framing for the section.</p>
+
+  <article class="item">
+    <div class="item-head">
+      <!-- severity badge first: tag sev major | minor | nit -->
+      <span class="tag sev minor">minor</span>
+      <h3>FILL: card title - stable across re-runs (it is the storage key)</h3>
+      <!-- status pill: st topost act | skipped | posted | recheck act |
+           addressed | stale act. Action pills always carry "act". -->
+      <span class="st topost act">to post</span>
+      <!-- certainty: tag cert verified | likely | unsure -->
+      <span class="tag cert likely">likely</span>
+      <!-- file link goes to the PR changes view: #diff-<sha256 of the
+           file path, no trailing newline> + R<line> (new code) or
+           L<line> (old side). Blob permalinks only for ranges or files
+           outside the PR diff (SKILL.md section 3). -->
+      <span class="who">FILL: path:line &middot; <a href="https://github.com/O/R/pull/NNN/changes#diff-SHA256OFPATHR10">in PR diff</a></span>
+    </div>
+    <p class="verdict v-minor"><strong>FILL: verdict.</strong> Evidence, file:line permalinks, why this is worth a comment; for likely or unsure, the premise you could not check.</p>
+    <div class="snippet">
+      <div class="snippet-head"><a href="https://github.com/O/R/blob/SHA/path#L1-L5">path:1-5</a><span class="where">why this snippet matters</span></div>
+      <pre><code>FILL: escaped code</code></pre>
+    </div>
+    <!-- the JS turns this block into an editable box with Copy and Revert;
+         write the best draft you can, the user's edits win from there. When
+         an export comes back with a draft marked EDITED BY ME, put that
+         wording here verbatim on the next publish. -->
+    <div class="snippet draft">
+      <div class="snippet-head"><span class="fixlbl">Paste-ready comment</span><span class="where">FILL: path:line it targets</span></div>
+      <pre><code>FILL: the comment in the user's voice, ready to paste on GitHub</code></pre>
+    </div>
+    <!-- once posted, link the thread on the card: -->
+    <!-- <p class="meta">Posted: <a href="https://github.com/O/R/pull/N#discussion_rID">thread</a></p> -->
+  </article>
+</section>
+
+<div class="fallback" id="fallback" hidden>
+  <h2 style="font-size:1rem">Your comments as one block</h2>
+  <p class="meta">Clipboard access was blocked - select everything below and copy it manually.</p>
+  <textarea id="fallback-text" readonly aria-label="All comments as one block"></textarea>
+</div>
+
+<footer class="report">
+  FILL: which head SHA the review and permalinks pin to, and when pills
+  were last refreshed against PR state.
+</footer>
+</main>
+
+<!--SCRIPT-->

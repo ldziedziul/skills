@@ -1,0 +1,113 @@
+<!-- lukasz-self-review report template (generated from _review-report-kit).
+     Fill the marked placeholder sections; keep classes/IDs and the script
+     intact - the JS wires collapsing, the status/label/word filters,
+     decision boxes, export, jump, and clear off them. Set KEY_PREFIX
+     (bottom) once per target and never change it, or the user's saved
+     decisions and collapse states orphan. Action pills carry class "act" -
+     the filter and the default-expanded state key off it. -->
+<title>PR #NNN Self-Review</title>
+<!--STYLE-->
+
+<main>
+<header class="report">
+  <p class="eyebrow">Self-review &middot; last refreshed <span id="updated-at">FILL: date -u +"%Y-%m-%d %H:%M UTC"</span></p>
+  <h1>FILL: PR <a href="...">#NNN</a> - title</h1>
+  <p class="meta">FILL: repo, target (PR or branch vs base), head SHA, diff survey in one sentence.</p>
+  <p class="meta" id="perspectives">FILL: perspectives run, each with the survey fact that selected it; perspectives deliberately skipped and why; any perspective that failed to run.</p>
+
+  <ul class="tally">
+    <!-- One li per pill in play (nonzero count); counts must sum to the
+         card count. Color classes on the li: act alone = red (to fix),
+         "act explain" = amber (explain in PR), "act stale" = amber (stale),
+         fixedlocal = blue, fixedpushed = green, explained = green,
+         no class = grey (dropped). data-st names the pill class the tile
+         filters (clicking a tile shows only cards carrying that pill):
+         tofix / explain / stale / fixedlocal / fixedpushed / explained / dropped. -->
+    <li class="act" data-st="tofix"><span class="n">0</span><span class="lbl">To fix</span></li>
+    <li class="act explain" data-st="explain"><span class="n">0</span><span class="lbl">Explain in PR</span></li>
+    <li class="act stale" data-st="stale"><span class="n">0</span><span class="lbl">Stale</span></li>
+    <li class="fixedlocal" data-st="fixedlocal"><span class="n">0</span><span class="lbl">Fixed locally</span></li>
+    <li class="fixedpushed" data-st="fixedpushed"><span class="n">0</span><span class="lbl">Fixed &amp; pushed</span></li>
+    <li data-st="dropped"><span class="n">0</span><span class="lbl">Dropped</span></li>
+  </ul>
+  <p class="meta" style="margin-top:1rem">Cards that need something from you start expanded; the rest collapse to their status line - click a header to toggle. Click a count above to show only that status. Decide with one click: <strong>Agree</strong> tells Claude to apply the suggested fix - the card collapses in place with a green edge and an <em>agreed</em> chip and the page moves on to the next open card; <strong>Drop</strong> means the code stays as it is - the card dims, is struck through and collapses in place, with an Undo; on your next visit dropped cards stay hidden until you click <strong>Show dropped</strong>. Click a pressed button again to take the decision back and re-open the card. Cards that ship words rather than code carry a paste-ready PR note - it is editable, <strong>Copy</strong> takes your wording and <strong>Revert</strong> restores Claude's, and an edited note is exported as yours, so Claude keeps it word for word. The text box is for anything else ("explain in PR", a different fix, a reason). Decisions and notes are saved in this browser. Cards in the next batch carry a <em>to copy</em> chip in their header - hover the Copy button to outline them, or use <strong>Not copied yet</strong> to list them. <strong>Copy new decisions</strong> exports the ones you haven't copied yet for Claude, which applies the fixes you asked for, flips the pills, and republishes (already-copied ones are skipped - use Copy all to re-send everything). Re-running the report after a push re-verifies every card against the new code.</p>
+  <div class="viewbar" data-pinned="FILL: comma-separated tag or lens texts to keep in this row; delete the attribute if none">
+    <button type="button" id="expand-all">Expand all</button>
+    <button type="button" id="collapse-all">Collapse all</button>
+    <span class="sep" aria-hidden="true"></span>
+    <button type="button" id="filter-action" aria-pressed="false">Action needed only</button>
+    <button type="button" id="filter-nonote" aria-pressed="false">Without my decision</button>
+    <button type="button" id="filter-pending" aria-pressed="false" hidden>Not copied yet</button>
+    <button type="button" id="show-dropped" aria-pressed="false" hidden>Show dropped</button>
+    <!-- pinned label chips are inserted here by the JS -->
+    <input type="search" id="search-text" placeholder='Filter by words - "quotes" for a phrase' aria-label="Filter cards by words" title="Press / to focus">
+  </div>
+  <details class="morefilters" id="more-filters">
+    <summary>More filters</summary>
+    <div class="labelgroups" id="label-groups"></div>
+  </details>
+  <p class="filterline" id="filter-line" hidden></p>
+</header>
+
+<!-- FILL: sections, one per severity in play, most severe first:
+     s-major / s-minor / s-nit; inside a section, verified before likely
+     before unsure. Example section + card: -->
+<section class="s-minor">
+  <h2>Minor <span class="count-chip">1</span></h2>
+  <p class="section-note">FILL: one-line framing for the section.</p>
+
+  <article class="item">
+    <div class="item-head">
+      <!-- severity badge first: tag sev major | minor | nit -->
+      <span class="tag sev minor">minor</span>
+      <h3>FILL: card title - stable across re-runs (it is the storage key)</h3>
+      <!-- status pill: st tofix act | explain act | stale act | fixedlocal |
+           fixedpushed | explained | dropped. Action pills always carry "act".
+           "dropped" = the user decided against it (MY DECISION: drop); the
+           card keeps their reason and hides by default. -->
+      <span class="st tofix act">to fix</span>
+      <!-- certainty: tag cert verified | likely | unsure -->
+      <span class="tag cert likely">likely</span>
+      <!-- one lens chip per perspective that raised the finding -->
+      <span class="lens">FILL: perspective</span>
+      <!-- file link: PR changes view #diff-<sha256 of path>R<line> when
+           there is a PR; blob permalink at the head SHA otherwise. -->
+      <span class="who">FILL: path:line &middot; <a href="https://github.com/O/R/pull/NNN/changes#diff-SHA256OFPATHR10">in PR diff</a></span>
+    </div>
+    <p class="verdict v-minor"><strong>FILL: verdict.</strong> Evidence with file:line permalinks; what you read to confirm it; for likely or unsure, the premise you could not check.</p>
+    <div class="snippet">
+      <div class="snippet-head"><a href="https://github.com/O/R/blob/SHA/path#L1-L5">path:1-5</a><span class="where">why this snippet matters</span></div>
+      <pre><code>FILL: escaped code</code></pre>
+    </div>
+    <div class="snippet suggest">
+      <div class="snippet-head"><span class="fixlbl">Suggested fix</span><span class="where">FILL: path:line it targets</span></div>
+      <pre><code>FILL: diff or replacement, concrete enough to apply</code></pre>
+    </div>
+    <!-- Only on cards whose answer is words, not code - typically the
+         "explain in PR" pill: what the user can paste into the PR
+         description or a review thread. The JS turns it into an editable
+         box with Copy and Revert; when an export comes back with a note
+         marked EDITED BY ME, put that wording here verbatim next publish.
+         Delete the block on cards that ship a code change. -->
+    <div class="snippet draft">
+      <div class="snippet-head"><span class="fixlbl">Paste-ready PR note</span><span class="where">FILL: where it goes - PR description, or the thread it answers</span></div>
+      <pre><code>FILL: the explanation in the user's voice, ready to paste on GitHub</code></pre>
+    </div>
+    <!-- once fixed, link the commit on the card: -->
+    <!-- <p class="meta">Fixed in <a href="https://github.com/O/R/commit/SHA">abcdef12</a> (verified: ...)</p> -->
+  </article>
+</section>
+
+<div class="fallback" id="fallback" hidden>
+  <h2 style="font-size:1rem">Your decisions as one block</h2>
+  <p class="meta">Clipboard access was blocked - select everything below and copy it manually.</p>
+  <textarea id="fallback-text" readonly aria-label="All decisions as one block"></textarea>
+</div>
+
+<footer class="report">
+  FILL: which head SHA the review and permalinks pin to; when pills were
+  last re-verified against the code; which perspectives ran that pass.
+</footer>
+</main>
+
+<!--SCRIPT-->

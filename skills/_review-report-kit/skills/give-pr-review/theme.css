@@ -1,0 +1,44 @@
+  /* give-pr-review: status pills, severity + certainty tags, section chips, label chips */
+  .tally .act .lbl { color: var(--fix); }
+  .tally .posted .lbl { color: var(--accent); }
+  .tally .addressed .lbl { color: var(--answer); }
+  .tally .stale .lbl { color: var(--docs); }
+  .s-major .count-chip { background: var(--fix-bg); color: var(--fix); }
+  .s-minor .count-chip { background: var(--decision-bg); color: var(--decision); }
+  .s-nit .count-chip { background: var(--docs-bg); color: var(--docs); }
+  article.item.dropped .item-head .st:not(.dropchip):not(.copychip):not(.skipped) { display: none; }
+  .tally .act { --tc: var(--fix); --tc-bg: var(--fix-bg); }
+  .tally .stale { --tc: var(--docs); --tc-bg: var(--docs-bg); }
+  .tally .posted { --tc: var(--accent); --tc-bg: var(--accent-bg); }
+  .tally .addressed { --tc: var(--answer); --tc-bg: var(--answer-bg); }
+  .st.topost { background: transparent; color: var(--fix); border: 1px dashed var(--fix); }
+  .st.recheck { background: transparent; color: var(--fix); border: 1px dashed var(--fix); }
+  .st.stale { background: var(--docs); color: var(--surface); }
+  .st.posted { background: var(--accent); color: var(--ground); }
+  .st.addressed { background: var(--answer); color: var(--surface); }
+  .st.skipped { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .v-major strong { color: var(--fix); }
+  .v-minor strong { color: var(--decision); }
+  .v-nit strong { color: var(--docs); }
+  .tag.sev { display: inline-flex; align-items: center; gap: .35rem; border-radius: 4px; padding: .14rem .55rem .14rem .4rem; font-weight: 800; letter-spacing: .07em; }
+  .tag.sev::before, .labelchip.sev::before { font-size: .95rem; line-height: 1; letter-spacing: 0; }
+  .tag.major::before, .labelchip.major::before { content: "\1F6D1"; }
+  .tag.minor::before, .labelchip.minor::before { content: "\1F527"; }
+  .tag.nit::before, .labelchip.nit::before { content: "\270F\FE0F"; }
+  .tag.major { background: var(--fix-bg); color: var(--fix); box-shadow: inset 0 0 0 1.5px var(--fix); }
+  .tag.minor { background: var(--docs-bg); color: var(--docs); }
+  .tag.nit { background: var(--code-bg); color: var(--muted); }
+  .tag.cert { display: inline-flex; align-items: center; gap: .35rem; background: transparent; padding: 0; border-radius: 0; font-size: .78rem; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .tag.cert::before, .labelchip.cert::before { font-size: .7rem; letter-spacing: 1px; }
+  .tag.verified::before, .labelchip.verified::before { content: "\25CF\25CF\25CF"; }
+  .tag.likely::before, .labelchip.likely::before { content: "\25CF\25CF\25CB"; }
+  .tag.unsure::before, .labelchip.unsure::before { content: "\25CF\25CB\25CB"; }
+  .tag.verified { color: var(--answer); }
+  .tag.likely { color: var(--docs); }
+  .tag.unsure { color: var(--decision); }
+  .labelchip.major { --lc: var(--fix); --lc-bg: var(--fix-bg); }
+  .labelchip.minor { --lc: var(--docs); --lc-bg: var(--docs-bg); }
+  .labelchip.nit { --lc: var(--muted); --lc-bg: var(--code-bg); }
+  .labelchip.verified { --lc: var(--answer); --lc-bg: var(--answer-bg); }
+  .labelchip.likely { --lc: var(--docs); --lc-bg: var(--docs-bg); }
+  .labelchip.unsure { --lc: var(--decision); --lc-bg: var(--decision-bg); }
