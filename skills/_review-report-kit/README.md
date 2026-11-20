@@ -96,9 +96,8 @@ the export calls its entries comments or decisions.
 
 1. Edit `core/*` (behaviour or shared look) or `skills/<name>/*` (one skill).
 2. `python3 skills/_review-report-kit/build.py`
-3. Test, from any directory that has jsdom installed:
-   `npm init -y && npm install jsdom@24` once, then
-   `node --test <repo>/skills/_review-report-kit/tests/*.test.js`
+3. Test, from `tests/` (jsdom comes from its lockfile):
+   `npm ci --ignore-scripts` once, then `node --test *.test.js`
 4. Never edit a `references/report-template.html` by hand; `build.py --check`
    (run by the tests) fails when a shipped file differs from the build.
 

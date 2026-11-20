@@ -1,0 +1,8 @@
+{
+  "name": "review-report-kit-tests",
+  "private": true,
+  "description": "jsdom for the kit's page tests; run them from this folder (npm ci --ignore-scripts, then node --test).",
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  }
+}

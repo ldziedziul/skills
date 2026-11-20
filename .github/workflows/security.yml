@@ -1,0 +1,76 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  betterleaks:
+    runs-on: ubuntu-latest
+    # Bump both together, to the release the pre-commit hook is at.
+    env:
+      VERSION: 1.10.0
+      SHA256: 9d9ad503cd5d80d18a939352266c3fcca52f10da9b83cd5cfe646989b13940fe
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Dependabot bumps the pre-commit hook, not this download: a bump fails
+      # here until the job's VERSION and SHA256 are updated to the same release.
+      - name: Same betterleaks as the pre-commit hook
+        run: |
+          rev=$(awk '/betterleaks\/betterleaks/ {f=1} f && /rev:/ {print $2; exit}' .pre-commit-config.yaml)
+          case "$rev" in
+            v*) want="v${VERSION}" ;;
+            *) want=$(git ls-remote https://github.com/betterleaks/betterleaks "refs/tags/v${VERSION}^{}" "refs/tags/v${VERSION}" | sort -r -k2 | awk 'NR==1 {print $1}') ;;
+          esac
+          if [ "$rev" != "$want" ]; then
+            echo "::error file=.pre-commit-config.yaml::pre-commit hook is at ${rev}, this workflow at v${VERSION} (${want}); update VERSION and SHA256 of the betterleaks job in .github/workflows/security.yml"
+            exit 1
+          fi
+
+      # The CLI, pinned and checksummed.
+      - name: Install betterleaks
+        run: |
+          curl -sSfL -o betterleaks.tar.gz \
+            "https://github.com/betterleaks/betterleaks/releases/download/v${VERSION}/betterleaks_${VERSION}_linux_x64.tar.gz"
+          echo "${SHA256}  betterleaks.tar.gz" | sha256sum -c -
+          tar -xzf betterleaks.tar.gz -C "$RUNNER_TEMP" betterleaks
+
+      # Every commit, every time: the history is small and a secret removed
+      # later is still in it.
+      - name: Scan the whole history
+        run: '"$RUNNER_TEMP/betterleaks" git --config .betterleaks.toml --redact --verbose .'
+
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The pushed or proposed commits; it checks whether a found key still works.
+      - uses: trufflesecurity/trufflehog@ea68ca03c865c5f324e86e849ced20ed3cf9dbbb # v3.99.8
+        with:
+          version: 3.99.8
+          extra_args: --results=verified,unknown
+
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Workflow security: unpinned actions, broad permissions, injection.
+      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          version: 1.32.0
+          advanced-security: false

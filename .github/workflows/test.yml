@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
@@ -22,13 +24,12 @@ jobs:
           python3 -m unittest discover -s .github/scripts -p 'test_*.py'
           python3 .github/scripts/check_skills.py
 
-      - name: Install jsdom
-        run: npm install --no-save --prefix "$RUNNER_TEMP/deps" jsdom@24
-
-      # The kit tests resolve jsdom from the working directory.
+      # The kit tests resolve jsdom from the working directory: its lockfile's.
       - name: Review report kit
-        working-directory: ${{ runner.temp }}/deps
-        run: node --test "$GITHUB_WORKSPACE"/skills/_review-report-kit/tests/*.test.js
+        working-directory: skills/_review-report-kit/tests
+        run: |
+          npm ci --ignore-scripts
+          node --test *.test.js
 
       - name: Hub profile builder
         run: node --test skills/lukasz-code-review/hub/*.test.mjs

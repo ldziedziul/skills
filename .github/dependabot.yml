@@ -1,0 +1,23 @@
+# Keeps the SHA-pinned actions, the betterleaks pre-commit hook and the kit
+# tests' jsdom current. The betterleaks download in security.yml is bumped by
+# hand; its job fails until it matches the hook.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+  - package-ecosystem: npm
+    directory: /skills/_review-report-kit/tests
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14

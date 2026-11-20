@@ -85,13 +85,26 @@ push to `main` and on pull requests. To run the same checks locally:
 # every skill has a SKILL.md with a matching name and a description
 python3 .github/scripts/check_skills.py
 
-# review report kit (needs jsdom in the directory you run from)
-cd "$(mktemp -d)" && npm install --no-save jsdom@24 \
-  && node --test "$OLDPWD"/skills/_review-report-kit/tests/*.test.js; cd -
+# Python tests of the checkers
+python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
+# review report kit (jsdom from its lockfile)
+(cd skills/_review-report-kit/tests && npm ci --ignore-scripts && node --test *.test.js)
 
 # hub profile builder
 node --test skills/lukasz-code-review/hub/*.test.mjs
 ```
+
+## Security checks
+
+[.github/workflows/security.yml](.github/workflows/security.yml) scans
+every push and pull request: betterleaks over the whole history, TruffleHog
+over the new commits (it also checks whether a found key still works),
+and zizmor over the workflows. Its rules for betterleaks are in
+`.betterleaks.toml`. To check each commit before it is made, run
+`pre-commit install` once; the hook uses the same rules.
+
+GitHub's own secret scanning and push protection are on as well.
 
 ## License
 

@@ -1,0 +1,9 @@
+# betterleaks rules: the defaults, minus the follow-up keys of the review-file
+# format ("c1834461001+9f3a2b1": comment ids and a short commit SHA), which
+# its generic-api-key rule takes for secrets.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Follow-up keys in skills/give-pr-review/references/review-file.md"
+regexes = ['''^c[0-9]+(\+c[0-9]+)*(\+[0-9a-f]{7})?$''']
