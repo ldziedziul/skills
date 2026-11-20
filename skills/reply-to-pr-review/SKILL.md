@@ -12,6 +12,7 @@ description: >
   a review, or paste back feedback that quotes a review triage report -
   even if they just say "check the review". Not for the queue of PRs
   waiting for the user's review (pr-triage).
+argument-hint: "[pr-url] [with report]"
 ---
 
 # Review replies report
@@ -33,7 +34,7 @@ exists (in the session, its URL pasted, or its review file):
 The HTML report is opt-in. By default a run's result is the review file
 (section 6), which the Herdr pull requests panel shows and acts on, and
 a short summary in chat. Build and publish the report page only when the
-user asks for it ("with the report", "publish the report") or asks to
+user asks for it (the argument `with report`, "with the report", "publish the report") or asks to
 refresh a report these review replies already have (its URL in the session, in
 memory, or in the file's `report`). With no report, `report` in the file
 is null and every "publish" or "republish" step is skipped.

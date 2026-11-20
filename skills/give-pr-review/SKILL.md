@@ -11,6 +11,7 @@ description: >
   their review on a PR after new pushes. Not for a plain code-review
   request with no tracking intent, and not for feedback the user RECEIVES
   on their own PR - that is reply-to-pr-review.
+argument-hint: "[pr-url] [with report]"
 ---
 
 # Review outbox report
@@ -31,7 +32,7 @@ review file exists:
 The HTML report is opt-in. By default a run's result is the review file
 (section 6), which the Herdr pull requests panel shows and acts on,
 and a short summary in chat. Build and publish the report page only when
-the user asks for it ("with the report", "publish the report", "the
+the user asks for it (the argument `with report`, "with the report", "publish the report", "the
 outbox report") or asks to refresh a report this review already has
 (its URL in the session, in memory, or in the file's `report`). With no
 report, `report` in the file is null and every "publish" or "republish"

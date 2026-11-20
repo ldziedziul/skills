@@ -11,6 +11,7 @@ description: >
   re-run after pushing fixes, or pastes back a decisions block that quotes
   one. Not for reviewing someone else's PR (give-pr-review) and not for
   feedback the user received on their PR (reply-to-pr-review).
+argument-hint: "[pr-url | branch <name>] [with report]"
 ---
 
 # Self-review report
@@ -34,7 +35,7 @@ its review file):
 The HTML report is opt-in. By default a run's result is the review file
 (section 8), which the Herdr pull requests panel shows and acts on,
 and a short summary in chat. Build and publish the report page only when
-the user asks for it ("with the report", "publish the report") or asks to refresh a report this review already has
+the user asks for it (the argument `with report`, "with the report", "publish the report") or asks to refresh a report this review already has
 (its URL in the session, in memory, or in the file's `report`). With no
 report, `report` in the file is null and every "publish" or "republish"
 step below is skipped.
