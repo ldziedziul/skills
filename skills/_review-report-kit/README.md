@@ -1,7 +1,7 @@
 # Review report kit
 
 The one source for the report pages that give-pr-review, reply-to-pr-review
-and lukasz-self-review publish as Claude artifacts. It is not a skill (no SKILL.md);
+and multi-perspective-review publish as Claude artifacts. It is not a skill (no SKILL.md);
 the skills ship the generated `references/report-template.html` and their
 SKILL.md files tell Claude to copy and fill that file at run time.
 

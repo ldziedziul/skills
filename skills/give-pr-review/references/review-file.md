@@ -304,7 +304,7 @@ pasted export block's would be (SKILL.md section 5):
 
 ## Self-reviews
 
-lukasz-self-review writes the same two files for a review of your own
+multi-perspective-review writes the same two files for a review of your own
 pull request, in a folder of its own beside give-pr-review's:
 
 ```

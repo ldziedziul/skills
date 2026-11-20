@@ -14,13 +14,13 @@ built-in `/plugin` command.
 | [give-pr-review](skills/give-pr-review/) | Tracks a review you give on someone else's PR: verified findings with paste-ready comments and their status after each push. |
 | [pr-triage](skills/pr-triage/) | Quickly assesses the PRs waiting for your review: size, risky areas, and whether to read it yourself, run Claude's review first or give it full attention. |
 | [reply-to-pr-review](skills/reply-to-pr-review/) | Triages the review comments on your own PR, tracks fixes and replies per thread. |
-| [lukasz-self-review](skills/lukasz-self-review/) | Reviews your own PR or branch from several perspectives before human review. |
+| [multi-perspective-review](skills/multi-perspective-review/) | Reviews your own PR or branch from several perspectives before human review. |
 | [lukasz-code-review](skills/lukasz-code-review/) | One-pass review in my own review voice; only when asked for by name. |
 | [plain-english-writing](skills/plain-english-writing/) | Rules for prose people read: plain words, consequences over mechanisms. |
 
 [_review-report-kit](skills/_review-report-kit/) is not a skill. It is the shared
 source for the report pages of give-pr-review, reply-to-pr-review and
-lukasz-self-review; see its README before changing any
+multi-perspective-review; see its README before changing any
 `references/report-template.html`.
 
 ## Requirements
@@ -31,10 +31,10 @@ lukasz-self-review; see its README before changing any
   skill when the session has them. Without them, the design reports are
   written as local HTML files with inline SVG figures.
 - Optional plugins, each replaced by a general-purpose agent when missing:
-  `pr-review-toolkit` (lukasz-self-review's perspectives), `maister`
+  `pr-review-toolkit` (multi-perspective-review's perspectives), `maister`
   (the maintainability pass of give-pr-review and high-level-design-review),
   `superpowers` (reply-to-pr-review's receiving-code-review discipline).
-- give-pr-review, reply-to-pr-review, lukasz-self-review and pr-triage
+- give-pr-review, reply-to-pr-review, multi-perspective-review and pr-triage
   write a review file for the Herdr pull requests panel. Without the
   panel the file is still written; ask for "the report" to work from a
   page instead.

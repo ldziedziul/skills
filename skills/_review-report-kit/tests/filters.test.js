@@ -1,5 +1,5 @@
 // The filter model shared by the three templates: status tiles, the word
-// filter with quoted phrases, label chips (lens chips in lukasz-self-review), and
+// filter with quoted phrases, label chips (lens chips in multi-perspective-review), and
 // the without-my-comment toggle. Fixture: three cards, the third published
 // as dropped (see decisions.test.js).
 const { test } = require("node:test");
@@ -53,8 +53,8 @@ for (const c of CASES) {
   });
 }
 
-test("lukasz-self-review: a lens chip becomes a label chip in the Perspective group", () => {
-  const c = CASES.find((x) => x.name === "lukasz-self-review");
+test("multi-perspective-review: a lens chip becomes a label chip in the Perspective group", () => {
+  const c = CASES.find((x) => x.name === "multi-perspective-review");
   const w = load(c);
   const lens = cardByTitle(w, "First card").querySelector(".item-head .lens");
   assert.ok(lens, "fixture card has a lens chip");
@@ -63,7 +63,7 @@ test("lukasz-self-review: a lens chip becomes a label chip in the Perspective gr
   assert.ok(Array.from(group.querySelectorAll("button.labelchip")).some((b) => b.textContent.trim().startsWith(lens.textContent.trim())));
 });
 
-for (const name of ["give-pr-review", "lukasz-self-review"]) {
+for (const name of ["give-pr-review", "multi-perspective-review"]) {
   test(`${name}: severity and certainty tags become chips in their own groups`, () => {
     const c = CASES.find((x) => x.name === name);
     const w = load(c);

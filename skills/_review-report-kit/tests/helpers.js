@@ -29,8 +29,8 @@ const CASES = [
     decisionLine: "MY DECISION:",
   },
   {
-    name: "lukasz-self-review",
-    file: `${SKILLS}/lukasz-self-review/references/report-template.html`,
+    name: "multi-perspective-review",
+    file: `${SKILLS}/multi-perspective-review/references/report-template.html`,
     agree: "agree", drop: "drop",
     droppedPill: '<span class="st dropped">dropped</span>',
     activePill: '<span class="st tofix act">to fix</span>',

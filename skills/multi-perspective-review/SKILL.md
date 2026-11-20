@@ -1,11 +1,11 @@
 ---
-name: lukasz-self-review
+name: multi-perspective-review
 description: >
   Reviews the user's OWN pull request or branch from several perspectives
   at once, verifies what the reviewers found and tracks each finding
   until the PR is ready, in a review file the Herdr pull requests panel
   shows. Use when the user wants their own change reviewed before or
-  between human reviews - "lukasz-self-review", "self-review", "review my
+  between human reviews - "multi-perspective-review", "self-review", "review my
   PR/branch from different perspectives", "what would reviewers flag",
   "am I ready to mark this ready for review" - or wants that self-review
   re-run after pushing fixes, or pastes back a decisions block that quotes
@@ -276,7 +276,7 @@ the perspective, `draft` the PR note or null, `suggestion` the fix,
 
 ## 9. Apply
 
-`/lukasz:lukasz-self-review apply <pr-url>` (or `apply branch <name>`
+`/lukasz:multi-perspective-review apply <pr-url>` (or `apply branch <name>`
 for a branch without a pull request) - sent by the user's tool when they
 press Fix or Apply now - is a short run, not a re-run:
 

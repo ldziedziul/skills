@@ -1,5 +1,5 @@
 // Behaviour tests for the one-click decision buttons shared by the three
-// review report templates (give-pr-review, reply-to-pr-review, lukasz-self-review).
+// review report templates (give-pr-review, reply-to-pr-review, multi-perspective-review).
 // Run from any scratch directory:
 //   npm init -y && npm install jsdom@24
 //   node --test ~/.claude/skills/_review-report-kit/tests/*.test.js
