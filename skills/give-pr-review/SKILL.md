@@ -11,7 +11,7 @@ description: >
   their review on a PR after new pushes. Not for a plain code-review
   request with no tracking intent, and not for feedback the user RECEIVES
   on their own PR - that is reply-to-pr-review.
-argument-hint: "[pr-url] [with report]"
+argument-hint: "[pr-url] [no report]"
 ---
 
 # Review outbox report
@@ -29,14 +29,18 @@ review file exists:
 - **Apply notes** ("apply notes <url>", sent by the user's tool): act on
   the notes not answered yet and nothing else (section 7).
 
-The HTML report is opt-in. By default a run's result is the review file
-(section 6), which the Herdr pull requests panel shows and acts on,
-and a short summary in chat. Build and publish the report page only when
-the user asks for it (the argument `with report`, "with the report", "publish the report", "the
-outbox report") or asks to refresh a report this review already has
-(its URL in the session, in memory, or in the file's `report`). With no
-report, `report` in the file is null and every "publish" or "republish"
-step below is skipped.
+Every run writes the review file (section 6), which the Herdr pull
+requests panel shows and acts on, and a short summary in chat. The HTML
+report page comes too, by default: a first run builds and publishes it.
+Leave it out when the command carries `no report` (the panel sends that,
+as it shows the cards itself) or the user says they don't want it. A
+re-run or an apply keeps what the review already has: it republishes when the
+file's `report` is set and skips the page when it is null, unless the
+user asks for the report (`with report`, "publish the report", "the outbox report").
+With no report, `report` in the file is null and every "publish" or
+"republish" step below is skipped. Without the Artifact tool, write the
+page to a local HTML file, put its path in `report`, and give the user
+the path.
 
 The user acts on what the report says - posts comments from it, approves
 PRs off it - so a wrongly-flipped pill or a silent gap makes them act on
@@ -96,7 +100,7 @@ verified finding gets carded, and the published report - not a chat
 reply - is where the user agrees or drops each one. As soon as the
 findings list is in hand, continue in the same turn straight through
 section 2 (gather PR ground truth), section 3 (build cards), section 4
-(pills), section 5 (publish, only when the report is asked for) and
+(pills), section 5 (publish, unless the run has no report) and
 section 6 (review file) - no pause to ask which findings to post or in
 what mode. The review file is the deliverable of this skill; a run that
 ends with a findings list and no written, checked review file is
@@ -216,9 +220,9 @@ Pills flip on evidence only:
 
 The header tally counts pills and must equal the card count.
 
-## 5. Build or update the page (only when asked)
+## 5. Build or update the page (unless the run has no report)
 
-Skip this section unless the report is asked for (see the top).
+Skip this section when the run has no report (see the top).
 
 Start from [references/report-template.html](references/report-template.html):
 copy it and fill its `FILL:` sections - never write the UI from scratch. Its
@@ -275,7 +279,8 @@ this console:
   write `decisions.json`: it belongs to the user's tool.
 - Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_review_file.py <folder>`
   and fix what it reports before you summarize. A run whose review file
-  fails the check is incomplete, as one without a published URL is.
+  fails the check is incomplete, as is one that skipped a report it
+  should have published.
 
 When there is a report, it and the file must agree: same findings, titles, drafts and
 pills.

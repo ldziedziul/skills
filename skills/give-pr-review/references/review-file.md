@@ -89,7 +89,8 @@ What Claude found and what it last knew about each finding.
 - `updatedAt` - when Claude last wrote the file, from `date -u`, ISO 8601
   in UTC.
 - `sources` - the review passes the findings came from.
-- `report` - the published report page, or null.
+- `report` - the published report page, the path of a local one when
+  there was no Artifact tool, or null for a review without a report.
 - `findings` - one per card, in the report's order.
   - `id` - stable for the life of the review: a slug of the first title,
     never changed when the title is. Decisions are keyed by it.

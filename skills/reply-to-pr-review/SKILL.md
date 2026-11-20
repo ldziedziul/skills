@@ -12,7 +12,7 @@ description: >
   a review, or paste back feedback that quotes a review triage report -
   even if they just say "check the review". Not for the queue of PRs
   waiting for the user's review (pr-triage).
-argument-hint: "[pr-url] [with report]"
+argument-hint: "[pr-url] [no report]"
 ---
 
 # Review replies report
@@ -31,13 +31,18 @@ exists (in the session, its URL pasted, or its review file):
   decisions and notes made there and not yet acted on, nothing else
   (section 7).
 
-The HTML report is opt-in. By default a run's result is the review file
-(section 6), which the Herdr pull requests panel shows and acts on, and
-a short summary in chat. Build and publish the report page only when the
-user asks for it (the argument `with report`, "with the report", "publish the report") or asks to
-refresh a report these review replies already have (its URL in the session, in
-memory, or in the file's `report`). With no report, `report` in the file
-is null and every "publish" or "republish" step is skipped.
+Every run writes the review file (section 6), which the Herdr pull
+requests panel shows and acts on, and a short summary in chat. The HTML
+report page comes too, by default: a first run builds and publishes it.
+Leave it out when the command carries `no report` (the panel sends that,
+as it shows the cards itself) or the user says they don't want it. A
+re-run or an apply keeps what these review replies already has: it republishes when the
+file's `report` is set and skips the page when it is null, unless the
+user asks for the report (`with report`, "publish the report").
+With no report, `report` in the file is null and every "publish" or
+"republish" step below is skipped. Without the Artifact tool, write the
+page to a local HTML file, put its path in `report`, and give the user
+the path.
 
 The user acts on what the report says, so a stale status or a silent gap
 makes them act on wrong information - accuracy beats speed everywhere
@@ -175,9 +180,9 @@ explains why the bug was a bug, it names files the commit already shows,
 it justifies a decision nobody disputed, or it restates the reviewer's
 argument after the acknowledgement.
 
-## 5. Build or update the page (only when asked)
+## 5. Build or update the page (unless the run has no report)
 
-Skip this section unless the report is asked for (see the top).
+Skip this section when the run has no report (see the top).
 
 Start from [references/report-template.html](references/report-template.html):
 copy it and fill its `FILL:` sections - never write the UI from scratch. Its

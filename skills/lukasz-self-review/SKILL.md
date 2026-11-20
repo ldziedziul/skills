@@ -11,7 +11,7 @@ description: >
   re-run after pushing fixes, or pastes back a decisions block that quotes
   one. Not for reviewing someone else's PR (give-pr-review) and not for
   feedback the user received on their PR (reply-to-pr-review).
-argument-hint: "[pr-url | branch <name>] [with report]"
+argument-hint: "[pr-url | branch <name>] [no report]"
 ---
 
 # Self-review report
@@ -32,13 +32,18 @@ its review file):
   decisions and notes the user made there and not yet acted on, nothing
   else (section 9).
 
-The HTML report is opt-in. By default a run's result is the review file
-(section 8), which the Herdr pull requests panel shows and acts on,
-and a short summary in chat. Build and publish the report page only when
-the user asks for it (the argument `with report`, "with the report", "publish the report") or asks to refresh a report this review already has
-(its URL in the session, in memory, or in the file's `report`). With no
-report, `report` in the file is null and every "publish" or "republish"
-step below is skipped.
+Every run writes the review file (section 8), which the Herdr pull
+requests panel shows and acts on, and a short summary in chat. The HTML
+report page comes too, by default: a first run builds and publishes it.
+Leave it out when the command carries `no report` (the panel sends that,
+as it shows the cards itself) or the user says they don't want it. A
+re-run or an apply keeps what the review already has: it republishes when the
+file's `report` is set and skips the page when it is null, unless the
+user asks for the report (`with report`, "publish the report").
+With no report, `report` in the file is null and every "publish" or
+"republish" step below is skipped. Without the Artifact tool, write the
+page to a local HTML file, put its path in `report`, and give the user
+the path.
 
 The user fixes code and marks the PR ready based on this page. A finding
 that was never verified, or a pill that flipped because code moved, makes
@@ -150,9 +155,9 @@ from memory or from other agents' lists.
   or question to minor; style to nit. An agent's `idea` is a `minor` or
   `nit`.
 
-## 5. Build the page (only when asked)
+## 5. Build the page (unless the run has no report)
 
-Skip this section unless the report is asked for (see the top).
+Skip this section when the run has no report (see the top).
 
 Start from [references/report-template.html](references/report-template.html):
 copy it and fill its `FILL:` sections - never write the UI from scratch. Its
